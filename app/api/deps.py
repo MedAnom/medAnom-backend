@@ -1,14 +1,15 @@
+# app/api/deps.py
 from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
-
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.core.security import decode_access_token
 from app.models.user_store import get_by_email
 from app.models.user import User
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")  # 실제 로그인 엔드포인트
+security = HTTPBearer(auto_error=True)
 
-def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
-    claims = decode_access_token(token)
+def get_current_user(creds: HTTPAuthorizationCredentials = Depends(security)) -> User:
+    token = creds.credentials
+    claims = decode_access_token(token)  # access 전용 검사
     email = claims.get("email")
     user = get_by_email(email) if email else None
     if not user:

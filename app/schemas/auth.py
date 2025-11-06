@@ -1,5 +1,10 @@
-from pydantic import BaseModel, Field
+# app/schemas/auth.py
+from pydantic import BaseModel
 from typing import Optional
+
+class Tokens(BaseModel):
+    accessToken: str
+    refreshToken: Optional[str] = None
 
 class LoginReq(BaseModel):
     email: str
@@ -11,11 +16,10 @@ class RegisterReq(BaseModel):
     name: Optional[str] = None
 
 class GoogleLoginReq(BaseModel):
-    credential: str = Field(..., description="Google ID Token(JWT)")
+    credential: str
 
-class Tokens(BaseModel):
-    accessToken: str
-    refreshToken: Optional[str] = None
+class RefreshReq(BaseModel):
+    refreshToken: str
 
 class MeRes(BaseModel):
     id: str
