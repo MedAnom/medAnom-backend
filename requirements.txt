@@ -14,3 +14,8 @@ google-auth>=2.23.0
 PyJWT>=2.8.0
 passlib[bcrypt]>=1.7.4
 python-dotenv>=1.0.1
+requests>=2.31.0
+
+
+passlib[bcrypt]>=1.7.4
+bcrypt<4
