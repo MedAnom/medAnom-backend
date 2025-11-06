@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from google.oauth2 import id_token
 from google.auth.transport import requests as grequests
 
@@ -7,6 +7,7 @@ from app.core.security import create_access_token, verify_password, hash_passwor
 from app.models.user_store import get_by_email, save_user, next_id
 from app.models.user import User
 from app.schemas.auth import LoginReq, RegisterReq, GoogleLoginReq, Tokens, MeRes
+from app.api.deps import get_current_user  # 👈 추가
 
 router = APIRouter()
 
@@ -44,11 +45,8 @@ def auth_login(req: LoginReq):
     }
 
 @router.get("/me", response_model=MeRes)
-def auth_me(user: User = ...):
-    # /auth/me는 deps.get_current_user로 보호 → analyze 라우터 참고
-    # 여기선 라우터만 두고, 실제 보호는 analyze에서 보여줌.
-    raise HTTPException(status_code=501, detail="Use /api/analyze to verify auth.")
-    # 필요하면 /auth/me를 별도 router로 분리해서 deps 적용해도 됨.
+def auth_me(user: User = Depends(get_current_user)):  # 👈 의존성으로 보호
+    return MeRes(id=user.id, email=user.email, name=user.name)
 
 @router.post("/google", response_model=dict)
 def auth_google(req: GoogleLoginReq):
