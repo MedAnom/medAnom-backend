@@ -155,7 +155,7 @@ def analyze_health(
         label_stk=int(risks["STK"]["label"]),
         health_score=int(health_score),
         summary_text=summary_text,
-        measured_at=payload.measured_at,  # ✅ 검사일 저장(없으면 NULL)
+        measured_at=payload.measured_at,  
     )
     session.add(rec)
     session.commit()
