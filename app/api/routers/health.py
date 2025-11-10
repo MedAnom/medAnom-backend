@@ -71,7 +71,7 @@ class Input(BaseModel):
     # 기본 지표
     SEX: conint(ge=0, le=1)
     AGE: conint(ge=0, le=120)
-    HGB: confloat(ge=0, le=30)
+    HGB: confloat(ge=0, le=200)
     TCHOL: conint(ge=0, le=1000)
     TG: conint(ge=0, le=3000)
     HDL: conint(ge=0, le=200)
