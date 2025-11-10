@@ -7,6 +7,9 @@ class HealthRecord(SQLModel, table=True):
     user_id: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
+    # ✅ 검사(측정)일 – 선택 입력
+    measured_at: Optional[datetime] = None
+
     sex: int
     age: int
     hgb: float
