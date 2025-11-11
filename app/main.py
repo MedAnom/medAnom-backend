@@ -10,6 +10,7 @@ from app.api.routers.health import router as health_router
 from app.api.routers.auth import router as auth_router
 from app.api.routers.analyze import router as analyze_router
 from app.api.routers.cost import router as cost_router
+from app.api.routers import advice, nearby
 
 app = FastAPI(title="MedAnom API")
 
@@ -31,3 +32,5 @@ app.include_router(health_router,  prefix="/api",  tags=["default"])
 app.include_router(auth_router,    prefix="/auth", tags=["auth"])
 app.include_router(analyze_router, prefix="/api",  tags=["default"])
 app.include_router(cost_router,    prefix="/api",  tags=["cost"])
+app.include_router(advice.router, prefix="/api", tags=["advice"])
+app.include_router(nearby.router, prefix="/api", tags=["nearby"])
