@@ -19,7 +19,7 @@ def ensure_measured_at_column():
         cols = [row[1] for row in res.fetchall()]
         if "measured_at" not in cols:
             conn.exec_driver_sql("ALTER TABLE healthrecord ADD COLUMN measured_at TIMESTAMP NULL;")
-            print("[DB] ✅ measured_at 컬럼 추가 완료")
+            print("[DB] measured_at 컬럼 추가 완료")
 
 # init_db() 이후 한 번 실행
 ensure_measured_at_column()

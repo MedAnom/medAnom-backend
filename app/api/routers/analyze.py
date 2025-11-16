@@ -2,14 +2,14 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path  # ✅ NameError fix
+from pathlib import Path
 from typing import Dict, Optional
 
 import joblib
 import numpy as np
 import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, conint, confloat
+from pydantic import BaseModel, Field
 
 from app.api.deps import get_current_user
 from app.models.user import User
@@ -49,6 +49,7 @@ def _load_models():
     try:
         for t in TARGETS:
             _models[t] = joblib.load(ART / f"model_{t}.pkl")
+
         # thresholds.json: {"ANE":{"threshold":0.5}, ...}
         with open(ART / "thresholds.json", "r", encoding="utf-8") as f:
             tj = json.load(f)
@@ -80,27 +81,27 @@ def _load_models():
 
 # ---------- 스키마 ----------
 class Input(BaseModel):
-    SEX: conint(ge=0, le=1)
-    AGE: conint(ge=0, le=120)
-    HGB: confloat(ge=0, le=200)
-    TCHOL: conint(ge=0, le=1000)
-    TG: conint(ge=0, le=3000)
-    HDL: conint(ge=0, le=200)
+    SEX: int = Field(..., ge=0, le=1)
+    AGE: int = Field(..., ge=0, le=120)
+    HGB: float = Field(..., ge=0, le=200)
+    TCHOL: int = Field(..., ge=0, le=1000)
+    TG: int = Field(..., ge=0, le=3000)
+    HDL: int = Field(..., ge=0, le=200)
+
     # 선택: 생활습관
-    sleep_hours: Optional[confloat(ge=0, le=24)] = None
-    exercise_days: Optional[conint(ge=0, le=7)] = None
+    sleep_hours: Optional[float] = Field(None, ge=0, le=24)
+    exercise_days: Optional[int] = Field(None, ge=0, le=7)
     smoking: Optional[bool] = None
-    alcohol_per_week: Optional[conint(ge=0, le=14)] = None
-    stress: Optional[conint(ge=1, le=5)] = None
+    alcohol_per_week: Optional[int] = Field(None, ge=0, le=14)
+    stress: Optional[int] = Field(None, ge=1, le=5)
 
 
-# ---------- 분석 ----------
 def _summary_text(
     risks: Dict[str, Dict[str, float | int | None]],
     anomalies: Dict[str, Dict[str, bool]],
     lifestyle: Dict[str, object],
 ) -> str:
-    msgs = []
+    msgs: list[str] = []
     top = max(risks.items(), key=lambda kv: kv[1]["prob"])
     msgs.append(f"가장 높은 위험도는 {top[0]}이며, 확률은 {round(top[1]['prob'] * 100)}%입니다.")
     warns = [k for k, v in anomalies.items() if v.get("warn")]
@@ -142,18 +143,24 @@ def analyze(payload: Input, me: User = Depends(get_current_user)):
             "prob": round(p1, 4),
             "label": int(p1 >= thr),
             "thr": float(thr),
-            "percentile": perc,  # ✅ 추가
+            "percentile": perc,
         }
 
     # 이상치(간단 규칙)
     anomalies = {
-        "HGB":   {"warn": payload.HGB < 11 or payload.HGB > 17},
+        "HGB": {"warn": payload.HGB < 11 or payload.HGB > 17},
         "TCHOL": {"warn": payload.TCHOL >= 200},
-        "TG":    {"warn": payload.TG >= 150},
-        "HDL":   {"warn": (payload.SEX == 1 and payload.HDL < 40) or (payload.SEX == 0 and payload.HDL < 50)},
+        "TG": {"warn": payload.TG >= 150},
+        "HDL": {
+            "warn": (payload.SEX == 1 and payload.HDL < 40)
+            or (payload.SEX == 0 and payload.HDL < 50)
+        },
     }
     warn_cnt = sum(1 for v in anomalies.values() if v["warn"])
-    health_score = max(0, 100 - int(max(risks[t]["prob"] for t in TARGETS) * 50) - warn_cnt * 5)
+    health_score = max(
+        0,
+        100 - int(max(risks[t]["prob"] for t in TARGETS) * 50) - warn_cnt * 5,
+    )
 
     lifestyle = {
         "sleep_hours": payload.sleep_hours,
@@ -171,6 +178,7 @@ def analyze(payload: Input, me: User = Depends(get_current_user)):
         peers = _ref_df[(_ref_df["SEX"] == payload.SEX) & (_ref_df["AGE_G"] == age_g)]
         similar_n = int(len(peers))
         if similar_n > 0:
+
             def pct(values: pd.Series, v: float) -> float:
                 return float((values < v).sum() / len(values) * 100.0)
 

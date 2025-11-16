@@ -26,7 +26,7 @@ def recent_history(
     )
     rows: List[HealthRecord] = session.exec(q).all()
 
-    # ✅ 프론트의 HistoryRow[] 형식으로 반환
+    # 프론트의 HistoryRow[] 형식으로 반환
     return [
         {
             "id": r.id,
