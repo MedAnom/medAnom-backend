@@ -36,7 +36,7 @@ GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID
 
 ### 1-4. 실행
 ```bash
-uvicorn main:app --reload --host 127.0.0.1 --port 8001
+python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8001
 ```
 - 헬스체크: `GET http://127.0.0.1:8001/api/health` → `{ "status": "ok" }`
 

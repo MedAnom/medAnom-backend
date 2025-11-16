@@ -12,10 +12,10 @@ venv/
 .DS_Store
 Thumbs.db
 
+
 #data
 혈액검사데이터_train.csv
 혈액검사데이터_test.csv
 
-app/artifacts/*
-!app/artifacts/README.md   
+app/artifacts/*  
 db.sqlite
